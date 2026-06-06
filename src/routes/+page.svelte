@@ -19,8 +19,16 @@
 	};
 </script>
 
-<h3>CPU</h3>
-<p>{(await stats).CPUPrec}%</p>
+<main>
+	<h3>CPU</h3>
+	<p>{(await stats).CPUPrec}%</p>
 
-<h3>RAM</h3>
-<p>{formatMem((await stats).MemUsage)} ({(await stats).MemPerc}%)</p>
+	<h3>RAM</h3>
+	<p>{formatMem((await stats).MemUsage)} ({(await stats).MemPerc}%)</p>
+</main>
+
+<style>
+	main {
+		padding: 10px;
+	}
+</style>

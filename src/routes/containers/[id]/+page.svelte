@@ -22,20 +22,20 @@
 	collectLogs();
 </script>
 
-<header>
-	<a href={resolve('/containers')}>Back</a>
-	<svelte:boundary>
-		{@const container = await data.container}
-		<div class="container-header">
-			<h2>{container?.Names}</h2>
-			<StatusPill status={container?.State || 'dead'} />
-		</div>
-		<p>ID: {container?.ID}</p>
-		<p>Image: {container?.Image}</p>
-	</svelte:boundary>
-</header>
-
 <main>
+	<header>
+		<a href={resolve('/containers')}>Back</a>
+		<svelte:boundary>
+			{@const container = await data.container}
+			<div class="container-header">
+				<h2>{container?.Names}</h2>
+				<StatusPill status={container?.State || 'dead'} />
+			</div>
+			<p>ID: {container?.ID}</p>
+			<p>Image: {container?.Image}</p>
+		</svelte:boundary>
+	</header>
+
 	<p class="logs-status">
 		{#if logsGenerator.connected}
 			Logs connected
@@ -57,7 +57,7 @@
 		flex-direction: column;
 		gap: 5px;
 
-		padding: 10px;
+		padding-bottom: 10px;
 	}
 
 	.container-header {
