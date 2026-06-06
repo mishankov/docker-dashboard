@@ -14,9 +14,9 @@
 	span {
 		width: fit-content;
 
-		border-radius: 100px;
-		padding-left: 5px;
-		padding-right: 5px;
+		border-radius: 10px;
+		padding-left: 8px;
+		padding-right: 8px;
 		padding-top: 3px;
 		padding-bottom: 3px;
 
