@@ -12,10 +12,14 @@
 		{#await data.containers}
 			<p>Loading...</p>
 		{:then containers}
-			{#each containers as { ID, Names, State } (ID)}
-				<div class="container-row">
-					<a href={resolve('/containers/[id]', { id: ID })}> {Names}</a>
-					<StatusPill status={State} />
+			{#each containers as { ID, Names, State, Image } (ID)}
+				<div class="container-card">
+					<span>
+						<a href={resolve('/containers/[id]', { id: ID })}> {Names}</a>
+					</span>
+					<span class="container-id">{ID}</span>
+					<span class="container-image">{Image}</span>
+					<span class="container-status"><StatusPill status={State} /> </span>
 				</div>
 			{/each}
 		{/await}
@@ -36,13 +40,38 @@
 
 	.containers-list {
 		display: flex;
-		flex-direction: column;
+		flex-direction: row;
+		flex-wrap: wrap;
+		gap: 10px;
 
 		padding: 10px;
+	}
+
+	.container-card {
+		width: 300px;
+		height: 120px;
+
+		padding: 10px;
+
+		display: flex;
+		flex-direction: column;
+		gap: 3px;
 
 		border: 0.5px solid var(--color-main-30);
 		border-radius: 10px;
 
 		background-color: var(--color-main-20);
+	}
+
+	.container-image {
+		color: var(--color-main-80);
+	}
+
+	.container-id {
+		color: var(--color-main-80);
+	}
+
+	.container-status {
+		margin-top: auto;
 	}
 </style>

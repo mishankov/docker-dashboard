@@ -23,7 +23,9 @@ const parseLogLine = (rawLine: string): LogLine => {
 
 export const dockerService = {
 	listContainers: async () => {
-		const output = execSync('docker ps --format json', { encoding: 'utf-8' }).split('\n');
+		const output = execSync('docker container ls --all --format json', { encoding: 'utf-8' }).split(
+			'\n'
+		);
 
 		const containers: {
 			ID: string;
@@ -40,7 +42,9 @@ export const dockerService = {
 		return containers;
 	},
 	getContainer: async (id: string) => {
-		const output = execSync('docker ps --format json', { encoding: 'utf-8' }).split('\n');
+		const output = execSync('docker container ls --all --format json', { encoding: 'utf-8' }).split(
+			'\n'
+		);
 
 		for (const container of output) {
 			if (!container) continue;
