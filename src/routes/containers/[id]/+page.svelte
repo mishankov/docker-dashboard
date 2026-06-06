@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
+	import StatusPill from '$lib/components/StatusPill.svelte';
 	import { streamLogs } from './logs.remote.js';
 
 	const { data, params } = $props();
@@ -21,16 +22,71 @@
 	collectLogs();
 </script>
 
-<a href={resolve('/')}>Home</a>
+<header>
+	<a href={resolve('/')}>Back</a>
+	<svelte:boundary>
+		{@const container = await data.container}
+		<div class="container-header">
+			<h2>{container?.Names}</h2>
+			<StatusPill status={container?.State || 'dead'} />
+		</div>
+		<p>ID: {container?.ID}</p>
+		<p>Image: {container?.Image}</p>
+	</svelte:boundary>
+</header>
 
-<svelte:boundary>
-	{@const container = await data.container}
-	<h2>{container?.Names} ({container?.Status})</h2>
-	<p>{container?.ID}</p>
-</svelte:boundary>
+<main>
+	<p class="logs-status">
+		{#if logsGenerator.connected}
+			Logs connected
+		{:else}
+			Logs disconnected
+		{/if}
+	</p>
 
-<p>Logs connected: {logsGenerator.connected}</p>
+	<div class="logs">
+		{#each logs as logLine (logLine.timestamp)}
+			<p id="logLine-{logLine.timestamp}">{logLine.logLine}</p>
+		{/each}
+	</div>
+</main>
 
-{#each logs as logLine (logLine.timestamp)}
-	<p id="logLine-{logLine.timestamp}">{logLine.logLine}</p>
-{/each}
+<style>
+	header {
+		display: flex;
+		flex-direction: column;
+		gap: 5px;
+
+		padding: 10px;
+	}
+
+	.container-header {
+		display: flex;
+		flex-direction: row;
+		gap: 5px;
+	}
+
+	main {
+		padding: 10px;
+	}
+
+	.logs-status {
+		color: var(--color-main-70);
+	}
+
+	.logs {
+		height: 500px;
+		overflow-x: auto;
+
+		padding: 10px;
+
+		display: flex;
+		flex-direction: column;
+		gap: 3px;
+
+		border: 0.5px solid var(--color-main-30);
+		border-radius: 10px;
+
+		background-color: var(--color-main-20);
+	}
+</style>

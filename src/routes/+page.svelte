@@ -3,6 +3,14 @@
 	import StatusPill from '$lib/components/StatusPill.svelte';
 
 	const { data } = $props();
+
+	const trimLong = (input: string) => {
+		const max = 30;
+		if (input.length > max) {
+			return input.slice(0, max - 3) + '...';
+		}
+		return input;
+	};
 </script>
 
 <main>
@@ -17,8 +25,8 @@
 					<span>
 						<a href={resolve('/containers/[id]', { id: ID })}> {Names}</a>
 					</span>
-					<span class="container-id">{ID}</span>
-					<span class="container-image">{Image}</span>
+					<span class="container-id">{trimLong(ID)}</span>
+					<span class="container-image">{trimLong(Image)}</span>
 					<span class="container-status"><StatusPill status={State} /> </span>
 				</div>
 			{/each}
