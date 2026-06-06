@@ -1,0 +1,43 @@
+* {
+	margin: 0;
+	box-sizing: border-box;
+}
+
+html,
+body {
+	min-height: 100%;
+	width: 100%;
+
+	font-family: monospace;
+}
+
+:root {
+    --color-main-10: hsl(212 100% 10%);
+    --color-main-20: hsl(212 100% 20%);
+    --color-main-30: hsl(212 100% 30%);
+    --color-main-40: hsl(212 100% 40%);
+    --color-main-50: hsl(212 100% 50%);
+    --color-main-60: hsl(212 100% 60%);
+    --color-main-70: hsl(212 100% 70%);
+    --color-main-80: hsl(212 100% 80%);
+    --color-main-90: hsl(212 100% 90%);
+
+    --color-accent-10: hsl(32 100% 10%);
+    --color-accent-20: hsl(32 100% 20%);
+    --color-accent-30: hsl(32 100% 30%);
+    --color-accent-40: hsl(32 100% 40%);
+    --color-accent-50: hsl(32 100% 50%);
+    --color-accent-60: hsl(32 100% 60%);
+    --color-accent-70: hsl(32 100% 70%);
+    --color-accent-80: hsl(32 100% 80%);
+    --color-accent-90: hsl(32 100% 90%);
+}
+
+body {
+    background-color: var(--color-main-10);
+    color: var(--color-main-90)
+}
+
+a {
+    color: var(--color-main-90);
+}
