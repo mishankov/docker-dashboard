@@ -23,7 +23,7 @@
 </script>
 
 <header>
-	<a href={resolve('/')}>Back</a>
+	<a href={resolve('/containers')}>Back</a>
 	<svelte:boundary>
 		{@const container = await data.container}
 		<div class="container-header">
