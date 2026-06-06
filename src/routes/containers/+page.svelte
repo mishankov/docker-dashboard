@@ -1,8 +1,7 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import StatusPill from '$lib/components/StatusPill.svelte';
-
-	const { data } = $props();
+	import { getContainers } from '$lib/docker/containers.remote';
 
 	const trimLong = (input: string) => {
 		const max = 30;
@@ -17,7 +16,7 @@
 	<h2>Containers</h2>
 
 	<div class="containers-list">
-		{#await data.containers}
+		{#await getContainers()}
 			<p>Loading...</p>
 		{:then containers}
 			{#each containers as { ID, Names, State, Image } (ID)}
