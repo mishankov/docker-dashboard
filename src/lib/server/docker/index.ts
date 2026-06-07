@@ -21,10 +21,6 @@ const parseLogLine = (rawLine: string): LogLine => {
 	};
 };
 
-export type Stat = {
-	CPUPerc: string;
-};
-
 export const dockerService = {
 	listContainers: async () => {
 		const output = execSync('docker container ls --all --format json', { encoding: 'utf-8' }).split(
@@ -141,41 +137,38 @@ export const dockerService = {
 		}
 	},
 
-	streamStats: async function* () {
-		while (true) {
-			let CPUPrec = 0;
-			let MemPerc = 0;
-			let MemUsage = 0;
-			const result = spawnSync('docker', ['stats', '--all', '--format', 'json', '--no-stream']);
-			for (const rawLine of result.stdout.toString().split('\n')) {
-				if (!rawLine) continue;
-				const stat: {
-					CPUPerc: string;
-					MemPerc: string;
-					MemUsage: string;
-				} = JSON.parse(rawLine);
+	getStats: async () => {
+		let CPUPrec = 0;
+		let MemPerc = 0;
+		let MemUsage = 0;
+		const result = spawnSync('docker', ['stats', '--all', '--format', 'json', '--no-stream']);
+		for (const rawLine of result.stdout.toString().split('\n')) {
+			if (!rawLine) continue;
+			const stat: {
+				CPUPerc: string;
+				MemPerc: string;
+				MemUsage: string;
+			} = JSON.parse(rawLine);
 
-				CPUPrec += Number(stat.CPUPerc.replace('%', ''));
-				MemPerc += Number(stat.MemPerc.replace('%', ''));
+			CPUPrec += Number(stat.CPUPerc.replace('%', ''));
+			MemPerc += Number(stat.MemPerc.replace('%', ''));
 
-				if (stat.MemUsage) {
-					const usedMem = stat.MemUsage.split(' / ')[0];
+			if (stat.MemUsage) {
+				const usedMem = stat.MemUsage.split(' / ')[0];
 
-					if (usedMem.endsWith('GiB'))
-						MemUsage += Number(usedMem.replace('GiB', '')) * 1024 * 1024 * 1024;
-					else if (usedMem.endsWith('MiB'))
-						MemUsage += Number(usedMem.replace('MiB', '')) * 1024 * 1024;
-					else if (usedMem.endsWith('KiB')) MemUsage += Number(usedMem.replace('KiB', '')) * 1024;
-					else if (usedMem.endsWith('B')) MemUsage += Number(usedMem.replace('B', ''));
-				}
+				if (usedMem.endsWith('GiB'))
+					MemUsage += Number(usedMem.replace('GiB', '')) * 1024 * 1024 * 1024;
+				else if (usedMem.endsWith('MiB'))
+					MemUsage += Number(usedMem.replace('MiB', '')) * 1024 * 1024;
+				else if (usedMem.endsWith('KiB')) MemUsage += Number(usedMem.replace('KiB', '')) * 1024;
+				else if (usedMem.endsWith('B')) MemUsage += Number(usedMem.replace('B', ''));
 			}
-
-			yield {
-				CPUPrec: CPUPrec.toFixed(2),
-				MemPerc: MemPerc.toFixed(2),
-				MemUsage: MemUsage.toFixed(2)
-			};
-			await new Promise((resolve) => setTimeout(resolve, 1000));
 		}
+
+		return {
+			CPUPrec: CPUPrec.toFixed(2),
+			MemPerc: MemPerc.toFixed(2),
+			MemUsage: MemUsage.toFixed(2)
+		};
 	}
 };

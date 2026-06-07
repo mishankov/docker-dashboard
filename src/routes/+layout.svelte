@@ -16,6 +16,7 @@
 	];
 
 	onMount(async () => {
+		// TODO: run load animation until data is loaded initialy
 		await initializeDockerState();
 		scheduleDockerStateUpdates();
 	});

@@ -1,23 +1,31 @@
-import { getContainers } from './docker.remote';
+import { getContainers, getStats } from './docker.remote';
+
+type Containers = {
+	id: string;
+	name: string;
+	image: string;
+	state: 'created' | 'restarting' | 'running' | 'removing' | 'paused' | 'exited' | 'dead';
+	status: string;
+};
+
+type Stats = {
+	cpuPrec: string;
+	memPrec: string;
+	memUsage: string;
+};
 
 type DockerState = {
-	containers: {
-		id: string;
-		name: string;
-		image: string;
-		state: 'created' | 'restarting' | 'running' | 'removing' | 'paused' | 'exited' | 'dead';
-		status: string;
-	}[];
+	containers?: Containers[];
+	stats?: Stats;
 };
 
 export const dockerState: DockerState = $state({ containers: [] });
-export const someSimple = $state('kek');
 
 export const initializeDockerState = async () => {
 	// initialize containers
 	dockerState.containers = [];
 	(await getContainers()).forEach((c) => {
-		dockerState.containers.push({
+		dockerState.containers?.push({
 			id: c.ID,
 			name: c.Names,
 			image: c.Image,
@@ -25,6 +33,14 @@ export const initializeDockerState = async () => {
 			status: c.Status
 		});
 	});
+
+	// initialize stats
+	const stats = await getStats();
+	dockerState.stats = {
+		cpuPrec: stats.CPUPrec,
+		memPrec: stats.MemPerc,
+		memUsage: stats.MemUsage
+	};
 };
 
 export const scheduleDockerStateUpdates = async () => {
@@ -32,7 +48,7 @@ export const scheduleDockerStateUpdates = async () => {
 		// update containers
 		await getContainers().refresh();
 
-		const containers = [];
+		const containers: Containers[] = [];
 		(await getContainers()).forEach((c) => {
 			containers.push({
 				id: c.ID,
@@ -43,6 +59,15 @@ export const scheduleDockerStateUpdates = async () => {
 			});
 		});
 		dockerState.containers = containers;
+
+		// update stats
+		await getStats().refresh();
+		const stats = await getStats();
+		dockerState.stats = {
+			cpuPrec: stats.CPUPrec,
+			memPrec: stats.MemPerc,
+			memUsage: stats.MemUsage
+		};
 
 		await new Promise((resolve) => setTimeout(resolve, 3000));
 	}

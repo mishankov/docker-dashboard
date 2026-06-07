@@ -1,9 +1,7 @@
 <script lang="ts">
-	import { streamStats } from './main.remote';
+	import { dockerState } from '$lib/store/docker-state.svelte';
 
-	const stats = streamStats();
-
-	const formatMem = (mem: string) => {
+	const formatMem = (mem: string = '0') => {
 		const memNum = Number(mem);
 		const variants = [
 			{ value: 1024 * 1024 * 1024, text: 'GiB' },
@@ -21,10 +19,10 @@
 
 <main>
 	<h3>CPU</h3>
-	<p>{(await stats).CPUPrec}%</p>
+	<p>{dockerState.stats?.cpuPrec}%</p>
 
 	<h3>RAM</h3>
-	<p>{formatMem((await stats).MemUsage)} ({(await stats).MemPerc}%)</p>
+	<p>{formatMem(dockerState.stats?.memUsage)} ({dockerState.stats?.memPrec}%)</p>
 </main>
 
 <style>
