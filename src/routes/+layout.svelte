@@ -2,7 +2,9 @@
 	import { resolve } from '$app/paths';
 	import { page } from '$app/stores';
 	import favicon from '$lib/assets/favicon.svg';
+	import Loader from '$lib/components/Loader.svelte';
 	import {
+		dockerState,
 		initializeDockerState,
 		scheduleDockerStateUpdates
 	} from '$lib/store/docker-state.svelte';
@@ -26,26 +28,32 @@
 	<link rel="icon" href={favicon} />
 </svelte:head>
 
-<div class="app">
-	<aside class="sidebar">
-		<nav>
-			<ul>
-				{#each navItems as { label, href } (href)}
-					<li>
-						<a {href} class="nav-link" class:active={$page.url.pathname === href}>
-							{label}
-						</a>
-					</li>
-				{/each}
-			</ul>
-		</nav>
-		<div class="app-name">Docker Dashboard</div>
-	</aside>
+{#if dockerState.initialStateLoaded}
+	<div class="app">
+		<aside class="sidebar">
+			<nav>
+				<ul>
+					{#each navItems as { label, href } (href)}
+						<li>
+							<a {href} class="nav-link" class:active={$page.url.pathname === href}>
+								{label}
+							</a>
+						</li>
+					{/each}
+				</ul>
+			</nav>
+			<div class="app-name">Docker Dashboard</div>
+		</aside>
 
-	<main class="content">
-		{@render children()}
-	</main>
-</div>
+		<main class="content">
+			{@render children()}
+		</main>
+	</div>
+{:else}
+	<div class="loader-wrapper">
+		<Loader size="40px" thickness="4px" />
+	</div>
+{/if}
 
 <style>
 	.app {
@@ -107,5 +115,13 @@
 	.content {
 		flex: 1;
 		overflow: auto;
+	}
+
+	.loader-wrapper {
+		width: 100vw;
+		height: 100vh;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 	}
 </style>

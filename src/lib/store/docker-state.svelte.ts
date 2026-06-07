@@ -15,11 +15,12 @@ type Stats = {
 };
 
 type DockerState = {
+	initialStateLoaded: boolean;
 	containers?: Containers[];
 	stats?: Stats;
 };
 
-export const dockerState: DockerState = $state({ containers: [] });
+export const dockerState: DockerState = $state({ initialStateLoaded: false, containers: [] });
 
 export const initializeDockerState = async () => {
 	// initialize containers
@@ -41,6 +42,8 @@ export const initializeDockerState = async () => {
 		memPrec: stats.MemPerc,
 		memUsage: stats.MemUsage
 	};
+
+	dockerState.initialStateLoaded = true;
 };
 
 export const scheduleDockerStateUpdates = async () => {
