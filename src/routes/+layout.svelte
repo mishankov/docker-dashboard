@@ -2,6 +2,11 @@
 	import { resolve } from '$app/paths';
 	import { page } from '$app/stores';
 	import favicon from '$lib/assets/favicon.svg';
+	import {
+		initializeDockerState,
+		scheduleDockerStateUpdates
+	} from '$lib/store/docker-state.svelte';
+	import { onMount } from 'svelte';
 
 	let { children } = $props();
 
@@ -9,6 +14,11 @@
 		{ label: 'Dashboard', href: resolve('/') },
 		{ label: 'Containers', href: resolve('/containers') }
 	];
+
+	onMount(async () => {
+		await initializeDockerState();
+		scheduleDockerStateUpdates();
+	});
 </script>
 
 <svelte:head>

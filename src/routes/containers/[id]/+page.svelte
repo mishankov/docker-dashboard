@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import StatusPill from '$lib/components/StatusPill.svelte';
+	import { dockerState } from '$lib/store/docker-state.svelte.js';
 	import { streamLogs } from './logs.remote.js';
 
 	const { data, params } = $props();
@@ -19,6 +20,15 @@
 		}
 	};
 
+	const container = $derived(dockerState.containers.find((c) => c.id === params.id));
+
+	// TODO: this should be better
+	// $effect(() => {
+	// 	if (container?.state === 'running') {
+	// 		logsGenerator.reconnect();
+	// 	}
+	// });
+
 	collectLogs();
 </script>
 
@@ -26,13 +36,12 @@
 	<header>
 		<a href={resolve('/containers')}>Back</a>
 		<svelte:boundary>
-			{@const container = await data.container}
 			<div class="container-header">
-				<h2>{container?.Names}</h2>
-				<StatusPill status={container?.State || 'dead'} />
+				<h2>{container?.name}</h2>
+				<StatusPill status={container?.state || 'dead'} />
 			</div>
-			<p>ID: {container?.ID}</p>
-			<p>Image: {container?.Image}</p>
+			<p>ID: {container?.id}</p>
+			<p>Image: {container?.image}</p>
 		</svelte:boundary>
 	</header>
 
