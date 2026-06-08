@@ -1,18 +1,15 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import StatusPill from '$lib/components/StatusPill.svelte';
+	import type { LogLine } from '$lib/server/docker/index.js';
 	import { dockerState } from '$lib/store/docker-state.svelte.js';
-	import { streamLogs } from './logs.remote.js';
+	import { streamLogs } from '$lib/store/docker.remote.js';
 
-	const { data, params } = $props();
+	const { params } = $props();
 
-	let logs = $state(await data.initialLogs);
-	console.log(logs);
+	let logs = $state<LogLine[]>([]);
 
-	let logsGenerator = streamLogs({
-		id: params.id,
-		after: logs.at(-1)?.timestamp || ''
-	});
+	let logsGenerator = streamLogs(params.id);
 
 	const collectLogs = async () => {
 		for await (const logLine of logsGenerator) {
@@ -21,7 +18,7 @@
 		}
 	};
 
-	const container = $derived(dockerState.containers.find((c) => c.id === params.id));
+	const container = $derived(dockerState.containers?.find((c) => c.id === params.id));
 
 	// TODO: this should be better
 	// $effect(() => {
@@ -29,7 +26,6 @@
 	// 		logsGenerator.reconnect();
 	// 	}
 	// });
-
 	collectLogs();
 </script>
 
@@ -47,7 +43,7 @@
 	</header>
 
 	<p class="logs-status">
-		{#if logsGenerator.connected}
+		{#if logsGenerator?.connected}
 			Logs connected
 		{:else}
 			Logs disconnected

@@ -1,5 +1,6 @@
-import { execSync, spawn, spawnSync } from 'child_process';
+import { execSync, spawnSync } from 'child_process';
 import Docker from 'dockerode';
+import { PassThrough } from 'stream';
 
 // TODO: handle different OSs
 const docker = new Docker({ socketPath: '/var/run/docker.sock' });
@@ -124,53 +125,90 @@ export const dockerService = {
 		return logs;
 	},
 
-	streamContainerLogs: async function* (id: string, after: string) {
-		const args = ['logs', '-f', '--timestamps'];
-		if (after) {
-			args.push('--since');
-			args.push(after);
-		}
-		args.push(id);
+	streamContainerLogs: async function* (id: string) {
+		const container = docker.getContainer(id);
+		const info = await container.inspect();
 
-		const logs = spawn('docker', args);
+		const logStream = await container.logs({
+			timestamps: true,
+			stdout: true,
+			stderr: true,
+			follow: true,
+			// since: after || undefined,
+			tail: 50
+		});
 
 		const queue: LogLine[] = [];
+		const pending = {
+			stdout: '',
+			stderr: ''
+		};
+
 		let done = false;
+		let error: Error | undefined;
 
-		logs.stdout.on('data', (chunk) => {
-			const rawLines = chunk.toString().split('\n');
-			for (const rawLine of rawLines) {
-				const logLine = parseLogLine(rawLine, 'stdout');
-				if (!logLine || logLine.timestamp == after) {
-					continue;
-				}
+		const pushText = (text: string, stream: 'stdout' | 'stderr') => {
+			pending[stream] += text;
 
-				queue.push(parseLogLine(rawLine, 'stdout'));
+			const lines = pending[stream].split('\n');
+			pending[stream] = lines.pop() ?? '';
+
+			for (const rawLine of lines) {
+				const line = rawLine.replace(/\r$/, '');
+				if (!line) continue;
+
+				const logLine = parseLogLine(line, stream);
+				if (!logLine) continue;
+
+				queue.push(logLine);
 			}
+		};
+
+		if (info.Config.Tty) {
+			logStream.on('data', (chunk) => {
+				pushText(chunk.toString('utf8'), 'stdout');
+			});
+		} else {
+			const stdout = new PassThrough();
+			const stderr = new PassThrough();
+
+			stdout.on('data', (chunk) => {
+				pushText(chunk.toString('utf8'), 'stdout');
+			});
+
+			stderr.on('data', (chunk) => {
+				pushText(chunk.toString('utf8'), 'stderr');
+			});
+
+			container.modem.demuxStream(logStream, stdout, stderr);
+		}
+
+		logStream.on('error', (streamError) => {
+			error = streamError;
+			done = true;
 		});
 
-		logs.stderr.on('data', (chunk) => {
-			const rawLines = chunk.toString().split('\n');
-			for (const rawLine of rawLines) {
-				const logLine = parseLogLine(rawLine);
-				if (!logLine || logLine.timestamp == after) {
-					continue;
-				}
-
-				queue.push(parseLogLine(rawLine));
-			}
+		logStream.on('end', () => {
+			done = true;
 		});
 
-		logs.on('close', () => {
+		logStream.on('close', () => {
 			done = true;
 		});
 
 		while (!done || queue.length > 0) {
-			if (queue.length > 0) {
-				yield queue.shift();
-			} else {
-				await new Promise((resolve) => setTimeout(resolve, 100));
+			const logLine = queue.shift();
+
+			if (logLine) {
+				yield logLine;
+				continue;
 			}
+
+			if (error) {
+				throw error;
+			}
+
+			await new Promise((resolve) => setTimeout(resolve, 100));
 		}
 	},
 
