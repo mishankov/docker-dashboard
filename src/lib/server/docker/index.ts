@@ -1,4 +1,8 @@
 import { execSync, spawn, spawnSync } from 'child_process';
+import Docker from 'dockerode';
+
+// TODO: handle different OSs
+const docker = new Docker({ socketPath: '/var/run/docker.sock' });
 
 export type ContainerStatus =
 	| 'created'
@@ -12,13 +16,45 @@ export type ContainerStatus =
 export type LogLine = {
 	timestamp: string;
 	logLine: string;
+	stream: 'stdout' | 'stderr';
 };
 
-const parseLogLine = (rawLine: string): LogLine => {
+const parseLogLine = (rawLine: string, stream: 'stdout' | 'stderr'): LogLine | undefined => {
+	const match = rawLine.match(/^(\S+)\s?(.*)$/);
+	if (!match) return;
+
 	return {
-		timestamp: rawLine.split(' ')[0],
-		logLine: rawLine.split(' ').slice(1).join(' ')
+		timestamp: match[1],
+		logLine: match[2],
+		stream
 	};
+};
+
+const decodeDockerLogBuffer = (buffer: Buffer, isTty: boolean) => {
+	if (isTty) {
+		return [{ stream: 'stdout' as const, text: buffer.toString('utf8') }];
+	}
+
+	const chunks: { stream: 'stdout' | 'stderr'; text: string }[] = [];
+	let offset = 0;
+
+	while (offset + 8 <= buffer.length) {
+		const streamType = buffer.readUInt8(offset);
+		const length = buffer.readUInt32BE(offset + 4);
+		const start = offset + 8;
+		const end = start + length;
+
+		if (end > buffer.length) break;
+
+		chunks.push({
+			stream: streamType === 2 ? 'stderr' : 'stdout',
+			text: buffer.subarray(start, end).toString('utf8')
+		});
+
+		offset = end;
+	}
+
+	return chunks;
 };
 
 export const dockerService = {
@@ -64,25 +100,26 @@ export const dockerService = {
 	},
 
 	getContainerLogs: async (id: string) => {
-		const result = spawnSync(`docker`, ['logs', '--timestamps', id]);
+		const container = docker.getContainer(id);
+		const info = await container.inspect();
+		const rawLogs = await container.logs({
+			timestamps: true,
+			stdout: true,
+			stderr: true,
+			follow: false,
+			tail: 100
+		});
 
 		const logs: LogLine[] = [];
 
-		for (const rawLine of result.stdout.toString().split('\n')) {
-			if (!rawLine) continue;
-			logs.push(parseLogLine(rawLine));
-		}
+		for (const chunk of decodeDockerLogBuffer(rawLogs, info.Config.Tty)) {
+			for (const rawLine of chunk.text.split('\n')) {
+				if (!rawLine) continue;
 
-		for (const rawLine of result.stderr.toString().split('\n')) {
-			if (!rawLine) continue;
-			logs.push(parseLogLine(rawLine));
+				const logLine = parseLogLine(rawLine, chunk.stream);
+				if (logLine) logs.push(logLine);
+			}
 		}
-
-		logs.sort((a, b) => {
-			if (a.timestamp < b.timestamp) return -1;
-			if (a.timestamp > b.timestamp) return 1;
-			return 0;
-		});
 
 		return logs;
 	},
@@ -103,12 +140,12 @@ export const dockerService = {
 		logs.stdout.on('data', (chunk) => {
 			const rawLines = chunk.toString().split('\n');
 			for (const rawLine of rawLines) {
-				const logLine = parseLogLine(rawLine);
-				if (logLine.timestamp == after) {
+				const logLine = parseLogLine(rawLine, 'stdout');
+				if (!logLine || logLine.timestamp == after) {
 					continue;
 				}
 
-				queue.push(parseLogLine(rawLine));
+				queue.push(parseLogLine(rawLine, 'stdout'));
 			}
 		});
 
@@ -116,7 +153,7 @@ export const dockerService = {
 			const rawLines = chunk.toString().split('\n');
 			for (const rawLine of rawLines) {
 				const logLine = parseLogLine(rawLine);
-				if (logLine.timestamp == after) {
+				if (!logLine || logLine.timestamp == after) {
 					continue;
 				}
 

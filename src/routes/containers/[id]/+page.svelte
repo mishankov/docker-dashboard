@@ -7,6 +7,7 @@
 	const { data, params } = $props();
 
 	let logs = $state(await data.initialLogs);
+	console.log(logs);
 
 	let logsGenerator = streamLogs({
 		id: params.id,
