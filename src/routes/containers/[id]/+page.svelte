@@ -20,12 +20,6 @@
 
 	const container = $derived(dockerState.containers?.find((c) => c.id === params.id));
 
-	// TODO: this should be better
-	// $effect(() => {
-	// 	if (container?.state === 'running') {
-	// 		logsGenerator.reconnect();
-	// 	}
-	// });
 	collectLogs();
 </script>
 
@@ -46,7 +40,11 @@
 		{#if logsGenerator?.connected}
 			Logs connected
 		{:else}
-			Logs disconnected
+			Logs disconnected <button
+				onclick={() => {
+					logsGenerator.reconnect();
+				}}>Reconnect</button
+			>
 		{/if}
 	</p>
 
