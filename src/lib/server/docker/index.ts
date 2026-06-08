@@ -15,6 +15,7 @@ export type ContainerStatus =
 	| 'dead';
 
 export type LogLine = {
+	id: string;
 	timestamp: string;
 	logLine: string;
 	stream: 'stdout' | 'stderr';
@@ -25,6 +26,7 @@ const parseLogLine = (rawLine: string, stream: 'stdout' | 'stderr'): LogLine | u
 	if (!match) return;
 
 	return {
+		id: crypto.randomUUID(),
 		timestamp: match[1],
 		logLine: match[2],
 		stream
@@ -56,6 +58,17 @@ const decodeDockerLogBuffer = (buffer: Buffer, isTty: boolean) => {
 	}
 
 	return chunks;
+};
+
+const toDockerSince = (timestamp: string) => {
+	if (!timestamp) return undefined;
+
+	const normalized = timestamp.replace(/\.(\d{3})\d*Z$/, '.$1Z');
+	const milliseconds = Date.parse(normalized);
+
+	if (Number.isNaN(milliseconds)) return undefined;
+
+	return Math.floor(milliseconds / 1000);
 };
 
 export const dockerService = {
@@ -125,7 +138,7 @@ export const dockerService = {
 		return logs;
 	},
 
-	streamContainerLogs: async function* (id: string) {
+	streamContainerLogs: async function* (id: string, after: string) {
 		const container = docker.getContainer(id);
 		const info = await container.inspect();
 
@@ -134,8 +147,7 @@ export const dockerService = {
 			stdout: true,
 			stderr: true,
 			follow: true,
-			// since: after || undefined,
-			tail: 50
+			since: toDockerSince(after) || undefined
 		});
 
 		const queue: LogLine[] = [];
@@ -158,7 +170,7 @@ export const dockerService = {
 				if (!line) continue;
 
 				const logLine = parseLogLine(line, stream);
-				if (!logLine) continue;
+				if (!logLine || logLine.timestamp === after) continue;
 
 				queue.push(logLine);
 			}

@@ -3,13 +3,13 @@
 	import StatusPill from '$lib/components/StatusPill.svelte';
 	import type { LogLine } from '$lib/server/docker/index.js';
 	import { dockerState } from '$lib/store/docker-state.svelte.js';
-	import { streamLogs } from '$lib/store/docker.remote.js';
+	import { getLogs, streamLogs } from '$lib/store/docker.remote.js';
 
 	const { params } = $props();
 
-	let logs = $state<LogLine[]>([]);
+	let logs = $state<LogLine[]>(await getLogs(params.id));
 
-	let logsGenerator = streamLogs(params.id);
+	let logsGenerator = streamLogs({ id: params.id, after: logs.at(-1)?.timestamp || '' });
 
 	const collectLogs = async () => {
 		for await (const logLine of logsGenerator) {
@@ -51,8 +51,11 @@
 	</p>
 
 	<div class="logs">
-		{#each logs as logLine (logLine.timestamp)}
-			<p id="logLine-{logLine.timestamp}">{logLine.logLine}</p>
+		{#each logs as logLine (logLine.id)}
+			<p id="logLine-{logLine.timestamp}" class={logLine.stream}>
+				<span style="font-weight: bolder;">{logLine.timestamp}</span>
+				{logLine.logLine}
+			</p>
 		{/each}
 	</div>
 </main>
@@ -84,15 +87,29 @@
 		height: 500px;
 		overflow-x: auto;
 
-		padding: 10px;
-
 		display: flex;
 		flex-direction: column;
-		gap: 3px;
 
 		border: 0.5px solid var(--color-main-30);
-		border-radius: 10px;
+		border-radius: 5px;
 
 		background-color: var(--color-main-20);
+	}
+
+	.logs p {
+		line-height: 25px;
+		padding-left: 5px;
+	}
+
+	.stdout {
+		background-color: var(--color-good-10);
+		color: var(--color-good-90);
+		border-left: 2px solid var(--color-good-50);
+	}
+
+	.stderr {
+		background-color: var(--color-bad-10);
+		color: var(--color-bad-90);
+		border-left: 2px solid var(--color-bad-50);
 	}
 </style>
