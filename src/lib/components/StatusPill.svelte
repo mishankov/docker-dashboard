@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { ContainerStatus } from '$lib/server/docker';
+	import type { ContainerStatus } from '$lib/server/docker/containers';
 
 	type Props = {
 		status: ContainerStatus;

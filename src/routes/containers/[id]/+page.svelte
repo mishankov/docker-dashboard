@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import StatusPill from '$lib/components/StatusPill.svelte';
-	import type { LogLine } from '$lib/server/docker/index.js';
-	import { dockerState } from '$lib/store/docker-state.svelte.js';
+	import type { LogLine } from '$lib/server/docker/logs.js';
+	import { getDockerState } from '$lib/store/docker-state.svelte.js';
 	import { getLogs, streamLogs } from '$lib/store/docker.remote.js';
 
 	const { params } = $props();
@@ -18,7 +18,7 @@
 		}
 	};
 
-	const container = $derived(dockerState.containers?.find((c) => c.id === params.id));
+	const container = $derived(getDockerState().containers?.find((c) => c.id === params.id));
 
 	collectLogs();
 </script>

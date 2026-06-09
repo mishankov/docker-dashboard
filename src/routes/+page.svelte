@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { dockerState } from '$lib/store/docker-state.svelte';
+	import { getDockerState } from '$lib/store/docker-state.svelte';
 
 	const formatMem = (mem: string = '0') => {
 		const memNum = Number(mem);
@@ -19,11 +19,11 @@
 
 <main>
 	<h3>CPU</h3>
-	<p>{dockerState.stats?.cpuPrec}% / {dockerState.stats?.cpuLimit}%</p>
+	<p>{getDockerState().stats?.cpuPrec}% / {getDockerState().stats?.cpuLimit}%</p>
 
 	<h3>RAM</h3>
 	<p>
-		{formatMem(dockerState.stats?.memUsage)} / {formatMem(dockerState.stats?.memLimit)} ({dockerState
+		{formatMem(getDockerState().stats?.memUsage)} / {formatMem(getDockerState().stats?.memLimit)} ({getDockerState()
 			.stats?.memPrec}%)
 	</p>
 </main>

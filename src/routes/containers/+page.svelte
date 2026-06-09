@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import StatusPill from '$lib/components/StatusPill.svelte';
-	import { dockerState } from '$lib/store/docker-state.svelte';
+	import { getDockerState } from '$lib/store/docker-state.svelte';
 
 	const trimLong = (input: string) => {
 		const max = 30;
@@ -16,10 +16,10 @@
 	<h2>Containers</h2>
 
 	<div class="containers-list">
-		{#each dockerState.containers as { id, name, state, image } (id)}
+		{#each getDockerState().containers as { id, name, state, image } (id)}
 			<div class="container-card">
 				<span>
-					<a href={resolve('/containers/[id]', { id: id })}> {name}</a>
+					<a href={resolve('/containers/[id]', { id: id })}>{name}</a>
 				</span>
 				<span class="container-id">{trimLong(id)}</span>
 				<span class="container-image">{trimLong(image)}</span>

@@ -1,6 +1,6 @@
 import { docker } from './docker';
 
-export const stats = async () => {
+export const getStats = async () => {
 	let CPUPerc = 0;
 	let CPULimit = 0;
 	let MemUsage = 0;

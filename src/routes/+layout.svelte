@@ -3,11 +3,7 @@
 	import { page } from '$app/stores';
 	import favicon from '$lib/assets/favicon.svg';
 	import Loader from '$lib/components/Loader.svelte';
-	import {
-		dockerState,
-		initializeDockerState,
-		scheduleDockerStateUpdates
-	} from '$lib/store/docker-state.svelte';
+	import { getDockerState, syncDockerState } from '$lib/store/docker-state.svelte';
 	import { onMount } from 'svelte';
 
 	let { children } = $props();
@@ -19,9 +15,7 @@
 	];
 
 	onMount(async () => {
-		// TODO: run load animation until data is loaded initialy
-		await initializeDockerState();
-		scheduleDockerStateUpdates();
+		syncDockerState();
 	});
 </script>
 
@@ -29,7 +23,7 @@
 	<link rel="icon" href={favicon} />
 </svelte:head>
 
-{#if dockerState.initialStateLoaded}
+{#if getDockerState().initialStateLoaded}
 	<div class="app">
 		<aside class="sidebar">
 			<nav>

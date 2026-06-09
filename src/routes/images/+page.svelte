@@ -1,8 +1,8 @@
 <script>
-	import { dockerState } from '$lib/store/docker-state.svelte';
+	import { getDockerState } from '$lib/store/docker-state.svelte';
 </script>
 
-{#each dockerState.images as image (image.id)}
+{#each getDockerState().images as image (image.id)}
 	<h3>{image.id}</h3>
 	<span>({image.containers})</span>
 	{#each image.tags as tag (tag)}
