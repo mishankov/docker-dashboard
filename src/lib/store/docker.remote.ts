@@ -59,6 +59,18 @@ export const streamState = query.live(async function* () {
 			state.images?.sort((a, b) => {
 				if (a.containers > b.containers) return -1;
 				if (a.containers < b.containers) return 1;
+
+				if (a.tags?.length && b.tags?.length) {
+					if (a.tags[0] > b.tags[0]) return 1;
+					if (a.tags[0] < b.tags[0]) return -1;
+				} else if (a.tags?.length) {
+					return -1;
+				} else if (b.tags?.length) {
+					return 1;
+				}
+
+				if (a.size > b.size) return -1;
+				if (a.size < b.size) return 1;
 				return 0;
 			});
 		});
