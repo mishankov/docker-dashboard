@@ -33,8 +33,9 @@ type DockerState = {
 
 export const dockerState: DockerState = $state({ initialStateLoaded: false, containers: [] });
 
-// TODO: run data getter in parallel
 // TODO: do not dublicate logic in initializeDockerState and scheduleDockerStateUpdates
+// TODO: use single call to server to fetch all state
+// TODO: run data getters in parallel (on server)
 export const initializeDockerState = async () => {
 	// initialize stats
 	const stats = await getStats();
