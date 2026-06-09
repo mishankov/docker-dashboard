@@ -63,7 +63,7 @@ export const streamState = query.live(async function* () {
 			});
 		});
 
-		await Promise.all([stats, containers, images]);
+		await Promise.allSettled([stats, containers, images]);
 
 		state.initialStateLoaded = true;
 		yield state;
