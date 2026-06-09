@@ -14,7 +14,8 @@
 
 	const navItems = [
 		{ label: 'Dashboard', href: resolve('/') },
-		{ label: 'Containers', href: resolve('/containers') }
+		{ label: 'Containers', href: resolve('/containers') },
+		{ label: 'Images', href: resolve('/images') }
 	];
 
 	onMount(async () => {

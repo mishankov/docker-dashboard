@@ -19,10 +19,13 @@
 
 <main>
 	<h3>CPU</h3>
-	<p>{dockerState.stats?.cpuPrec}%</p>
+	<p>{dockerState.stats?.cpuPrec}% / {dockerState.stats?.cpuLimit}%</p>
 
 	<h3>RAM</h3>
-	<p>{formatMem(dockerState.stats?.memUsage)} ({dockerState.stats?.memPrec}%)</p>
+	<p>
+		{formatMem(dockerState.stats?.memUsage)} / {formatMem(dockerState.stats?.memLimit)} ({dockerState
+			.stats?.memPrec}%)
+	</p>
 </main>
 
 <style>

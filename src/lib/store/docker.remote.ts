@@ -1,10 +1,15 @@
 import { query } from '$app/server';
-import { dockerService } from '$lib/server/docker';
+import { stats } from '$lib/server/docker';
+import { listContainers } from '$lib/server/docker/containers';
+import { listImages } from '$lib/server/docker/images';
+import { getContainerLogs, streamContainerLogs } from '$lib/server/docker/logs';
 
-export const getContainers = query(dockerService.listContainers);
-export const getStats = query(dockerService.getStats);
+export const getStats = query(stats);
+export const getContainers = query(listContainers);
 
 export const streamLogs = query.live('unchecked', (arg: { id: string; after: string }) => {
-	return dockerService.streamContainerLogs(arg.id, arg.after);
+	return streamContainerLogs(arg.id, arg.after);
 });
-export const getLogs = query('unchecked', dockerService.getContainerLogs);
+export const getLogs = query('unchecked', getContainerLogs);
+
+export const getImages = query(listImages);
