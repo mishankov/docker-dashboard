@@ -1,7 +1,6 @@
 <script>
 	import { getDockerState } from '$lib/store/docker-state.svelte';
-	import { formatMemotySize } from '$lib/utils';
-	formatMemorySize;
+	import { formatMemorySize } from '$lib/utils';
 	let searchString = $state('');
 
 	let images = $derived.by(() => {
@@ -37,7 +36,7 @@
 							<p>{tag}</p>
 						{/each}
 					</td>
-					<td>{formatMemotySize(image.size.toString())}</td>
+					<td>{formatMemorySize(image.size.toString())}</td>
 				</tr>
 			{/each}
 		</tbody>
