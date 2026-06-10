@@ -1,25 +1,39 @@
-<script>
+<script lang="ts">
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
+	import Message from '$lib/components/Message.svelte';
 	import TextInput from '$lib/components/TextInput.svelte';
 	import { getDockerState } from '$lib/store/docker-state.svelte';
 	import { formatMemorySize, trimLong } from '$lib/utils';
+	import { remove } from './images.remote';
+
 	let searchString = $state('');
+	let takingAction = $state(false);
+	let message = $state({ message: '', type: '' as 'success' | 'error' });
+	let deletedImageIds = $state<string[]>([]);
 
 	let images = $derived.by(() => {
-		if (!searchString) return getDockerState().images;
+		return getDockerState()
+			.images?.filter((i) => {
+				if (!searchString) return true;
+				return (
+					i.Id.includes(searchString) ||
+					(i.RepoTags && i.RepoTags.some((t) => t.includes(searchString)))
+				);
+			})
+			.filter((i) => {
+				if (deletedImageIds.length === 0) return true;
 
-		return getDockerState().images?.filter((i) => {
-			return (
-				i.Id.includes(searchString) ||
-				(i.RepoTags && i.RepoTags.some((t) => t.includes(searchString)))
-			);
-		});
+				return !deletedImageIds.includes(i.Id);
+			});
 	});
 </script>
 
 <main>
 	<h2>Images</h2>
+	{#if message.message}
+		<Message message={message.message} type={message.type} />
+	{/if}
 	<TextInput bind:value={searchString} placeholder="Search" />
 	<table>
 		<thead>
@@ -45,6 +59,31 @@
 						{/each}
 					</td>
 					<td>{formatMemorySize(image.Size.toString())}</td>
+					<td
+						><button
+							disabled={takingAction}
+							onclick={async (e) => {
+								e.preventDefault();
+								e.stopPropagation();
+								takingAction = true;
+								message = { message: '', type: 'success' };
+
+								const result = await remove(image.Id);
+
+								if (result) {
+									message = { message: result.message, type: 'error' };
+								} else {
+									deletedImageIds.push(image.Id);
+									message = {
+										message: `Successufuly removed image ${image.RepoTags ? image.RepoTags[0] : image.Id}`,
+										type: 'success'
+									};
+								}
+
+								takingAction = false;
+							}}>Remove</button
+						></td
+					>
 				</tr>
 			{/each}
 		</tbody>

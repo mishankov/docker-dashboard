@@ -9,7 +9,7 @@
 		all: unset;
 
 		height: 30px;
-		max-width: 300px;
+		max-width: 500px;
 
 		background: var(--color-main-20);
 		padding: 5px 10px 5px 10px;
