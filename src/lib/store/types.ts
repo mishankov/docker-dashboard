@@ -1,4 +1,4 @@
-import type { ContainerStatus } from '$lib/server/docker/containers';
+import type { ContainerInfo, ImageInfo } from 'dockerode';
 
 type Stats = {
 	cpuPrec: string;
@@ -8,24 +8,9 @@ type Stats = {
 	memLimit: string;
 };
 
-type Container = {
-	id: string;
-	name: string;
-	image: string;
-	state: ContainerStatus;
-	status: string;
-};
-
-type Image = {
-	id: string;
-	tags?: string[];
-	size: number;
-	containers: number;
-};
-
 export type DockerState = {
 	initialStateLoaded: boolean;
 	stats?: Stats;
-	containers?: Container[];
-	images?: Image[];
+	containers?: ContainerInfo[];
+	images?: ImageInfo[];
 };

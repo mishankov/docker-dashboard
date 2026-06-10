@@ -9,14 +9,14 @@
 	<h2>Containers</h2>
 
 	<div class="containers-list">
-		{#each getDockerState().containers as { id, name, state, image } (id)}
+		{#each getDockerState().containers as { Id, Names, State, Image } (Id)}
 			<div class="container-card">
 				<span>
-					<a href={resolve('/containers/[id]', { id: id })}>{name}</a>
+					<a href={resolve('/containers/[id]', { id: Id })}>{Names[0]}</a>
 				</span>
-				<span class="container-id">{trimLong(id)}</span>
-				<span class="container-image">{trimLong(image)}</span>
-				<span class="container-status"><StatusPill status={state} /> </span>
+				<span class="container-id">{trimLong(Id)}</span>
+				<span class="container-image">{trimLong(Image)}</span>
+				<span class="container-status"><StatusPill status={State} /> </span>
 			</div>
 		{/each}
 	</div>

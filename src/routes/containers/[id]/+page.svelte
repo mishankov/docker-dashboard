@@ -18,7 +18,7 @@
 		}
 	};
 
-	const container = $derived(getDockerState().containers?.find((c) => c.id === params.id));
+	const container = $derived(getDockerState().containers?.find((c) => c.Id === params.id));
 
 	collectLogs();
 </script>
@@ -28,11 +28,11 @@
 		<a href={resolve('/containers')}>Back</a>
 		<svelte:boundary>
 			<div class="container-header">
-				<h2>{container?.name}</h2>
-				<StatusPill status={container?.state || 'dead'} />
+				<h2>{container?.Names[0]}</h2>
+				<StatusPill status={container?.State || 'dead'} />
 			</div>
-			<p>ID: {container?.id}</p>
-			<p>Image: {container?.image}</p>
+			<p>ID: {container?.Id}</p>
+			<p>Image: {container?.Image}</p>
 		</svelte:boundary>
 	</header>
 

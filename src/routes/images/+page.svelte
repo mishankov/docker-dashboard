@@ -11,7 +11,8 @@
 
 		return getDockerState().images?.filter((i) => {
 			return (
-				i.id.includes(searchString) || (i.tags && i.tags.some((t) => t.includes(searchString)))
+				i.Id.includes(searchString) ||
+				(i.RepoTags && i.RepoTags.some((t) => t.includes(searchString)))
 			);
 		});
 	});
@@ -30,20 +31,20 @@
 			</tr>
 		</thead>
 		<tbody>
-			{#each images as image (image.id)}
+			{#each images as image (image.Id)}
 				<tr
 					onclick={() => {
-						goto(resolve('/images/[id]', { id: image.id }));
+						goto(resolve('/images/[id]', { id: image.Id }));
 					}}
 				>
-					<td>{image.id.slice(7, 19)}</td>
-					<td>{image.containers}</td>
+					<td>{image.Id.slice(7, 19)}</td>
+					<td>{image.Containers}</td>
 					<td>
-						{#each image.tags as tag (tag)}
+						{#each image.RepoTags as tag (tag)}
 							<p>{trimLong(tag, 75)}</p>
 						{/each}
 					</td>
-					<td>{formatMemorySize(image.size.toString())}</td>
+					<td>{formatMemorySize(image.Size.toString())}</td>
 				</tr>
 			{/each}
 		</tbody>

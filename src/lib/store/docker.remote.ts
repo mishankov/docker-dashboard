@@ -1,7 +1,7 @@
 import { query } from '$app/server';
 
 import { getStats } from '$lib/server/docker';
-import { listContainers, type ContainerStatus } from '$lib/server/docker/containers';
+import { listContainers } from '$lib/server/docker/containers';
 import { listImages } from '$lib/server/docker/images';
 import { getContainerLogs, streamContainerLogs } from '$lib/server/docker/logs';
 
@@ -31,46 +31,29 @@ export const streamState = query.live(async function* () {
 		// Containers
 		const containers = listContainers();
 		containers.then((cs) => {
-			state.containers = [];
-			cs.forEach((c) => {
-				state.containers?.push({
-					id: c.Id,
-					name: c.Names[0],
-					image: c.Image,
-					state: c.State as ContainerStatus,
-					status: c.Status
-				});
-			});
+			state.containers = cs;
 		});
 
 		// Images
 		const images = listImages();
 		images.then((is) => {
-			state.images = [];
-			is.forEach((i) => {
-				state.images?.push({
-					id: i.Id,
-					tags: i.RepoTags,
-					size: i.Size,
-					containers: i.Containers
-				});
-			});
+			state.images = is;
 
 			state.images?.sort((a, b) => {
-				if (a.containers > b.containers) return -1;
-				if (a.containers < b.containers) return 1;
+				if (a.Containers > b.Containers) return -1;
+				if (a.Containers < b.Containers) return 1;
 
-				if (a.tags?.length && b.tags?.length) {
-					if (a.tags[0] > b.tags[0]) return 1;
-					if (a.tags[0] < b.tags[0]) return -1;
-				} else if (a.tags?.length) {
+				if (a.RepoTags?.length && b.RepoTags?.length) {
+					if (a.RepoTags[0] > b.RepoTags[0]) return 1;
+					if (a.RepoTags[0] < b.RepoTags[0]) return -1;
+				} else if (a.RepoTags?.length) {
 					return -1;
-				} else if (b.tags?.length) {
+				} else if (b.RepoTags?.length) {
 					return 1;
 				}
 
-				if (a.size > b.size) return -1;
-				if (a.size < b.size) return 1;
+				if (a.Size > b.Size) return -1;
+				if (a.Size < b.Size) return 1;
 				return 0;
 			});
 		});
