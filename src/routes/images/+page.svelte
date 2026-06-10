@@ -1,6 +1,9 @@
 <script>
+	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
+	import TextInput from '$lib/components/TextInput.svelte';
 	import { getDockerState } from '$lib/store/docker-state.svelte';
-	import { formatMemorySize } from '$lib/utils';
+	import { formatMemorySize, trimLong } from '$lib/utils';
 	let searchString = $state('');
 
 	let images = $derived.by(() => {
@@ -16,7 +19,7 @@
 
 <main>
 	<h2>Images</h2>
-	<input class="search" type="text" placeholder="Search" bind:value={searchString} />
+	<TextInput bind:value={searchString} placeholder="Search" />
 	<table>
 		<thead>
 			<tr>
@@ -28,12 +31,16 @@
 		</thead>
 		<tbody>
 			{#each images as image (image.id)}
-				<tr>
+				<tr
+					onclick={() => {
+						goto(resolve('/images/[id]', { id: image.id }));
+					}}
+				>
 					<td>{image.id.slice(7, 19)}</td>
 					<td>{image.containers}</td>
 					<td>
 						{#each image.tags as tag (tag)}
-							<p>{tag}</p>
+							<p>{trimLong(tag, 75)}</p>
 						{/each}
 					</td>
 					<td>{formatMemorySize(image.size.toString())}</td>
@@ -42,7 +49,6 @@
 		</tbody>
 	</table>
 </main>
-formatMemorySize
 
 <style>
 	main {
@@ -54,10 +60,6 @@ formatMemorySize
 		gap: 10px;
 
 		padding: 10px;
-	}
-
-	.search {
-		width: 300px;
 	}
 
 	table {
@@ -79,6 +81,18 @@ formatMemorySize
 		text-align: left;
 		width: fit-content;
 
-		padding-left: 20px;
+		padding: 5px 0px 5px 20px;
+	}
+
+	tr:nth-child(odd) {
+		background-color: var(--color-main-10);
+	}
+
+	tr:nth-child(even) {
+		background-color: var(--color-main-20);
+	}
+
+	tbody tr:hover {
+		background-color: var(--color-main-30);
 	}
 </style>

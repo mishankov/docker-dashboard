@@ -2,14 +2,7 @@
 	import { resolve } from '$app/paths';
 	import StatusPill from '$lib/components/StatusPill.svelte';
 	import { getDockerState } from '$lib/store/docker-state.svelte';
-
-	const trimLong = (input: string) => {
-		const max = 30;
-		if (input.length > max) {
-			return input.slice(0, max - 3) + '...';
-		}
-		return input;
-	};
+	import { trimLong } from '$lib/utils';
 </script>
 
 <main>

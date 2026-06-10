@@ -12,3 +12,10 @@ export const formatMemorySize = (mem: string = '0') => {
 
 	return memNum.toFixed(2) + ' B';
 };
+
+export const trimLong = (input: string, max = 30) => {
+	if (input.length > max) {
+		return input.slice(0, max - 3) + '...';
+	}
+	return input;
+};
