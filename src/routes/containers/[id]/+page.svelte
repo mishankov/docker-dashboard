@@ -56,6 +56,15 @@
 			</p>
 		{/each}
 	</div>
+
+	<h3>Raw data</h3>
+	<pre>
+    {JSON.stringify(
+			getDockerState().containers?.find((i) => i.Id === params.id),
+			null,
+			2
+		)}
+</pre>
 </main>
 
 <style>
