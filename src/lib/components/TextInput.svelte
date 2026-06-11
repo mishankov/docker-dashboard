@@ -32,4 +32,8 @@
 
 		transition: all 50ms;
 	}
+
+	input::placeholder {
+		color: var(--color-main-50);
+	}
 </style>

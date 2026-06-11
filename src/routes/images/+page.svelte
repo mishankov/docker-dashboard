@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
+	import Button from '$lib/components/Button.svelte';
 	import Message from '$lib/components/Message.svelte';
 	import TextInput from '$lib/components/TextInput.svelte';
 	import { getDockerState } from '$lib/store/docker-state.svelte';
@@ -61,7 +62,8 @@
 					<td>{formatMemorySize(image.Size.toString())}</td>
 					<td>
 						{#if image.Containers < 1}
-							<button
+							<Button
+								kind="danger"
 								disabled={takingAction || image.Containers > 0}
 								title="Will force remove image with all its tags"
 								onclick={async (e) => {
@@ -86,7 +88,7 @@
 								}}
 							>
 								Remove
-							</button>
+							</Button>
 						{/if}
 					</td>
 				</tr>
@@ -137,7 +139,12 @@
 		background-color: var(--color-main-20);
 	}
 
+	tr {
+		transition: all 100ms;
+	}
+
 	tbody tr:hover {
 		background-color: var(--color-main-30);
+		transition: all 50ms;
 	}
 </style>

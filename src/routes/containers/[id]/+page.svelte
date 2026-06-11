@@ -25,14 +25,17 @@
 
 <main>
 	<header>
-		<a href={resolve('/containers')}>Back</a>
 		<svelte:boundary>
 			<div class="container-header">
 				<h2>{container?.Names[0]}</h2>
 				<StatusPill status={container?.State || 'dead'} />
 			</div>
 			<p>ID: {container?.Id}</p>
-			<p>Image: {container?.Image}</p>
+			<p>
+				Image: <a href={resolve('/images/[id]', { id: container?.ImageID || '' })}
+					>{container?.Image}</a
+				>
+			</p>
 		</svelte:boundary>
 	</header>
 

@@ -2,6 +2,7 @@
 	import { resolve } from '$app/paths';
 	import { page } from '$app/stores';
 	import favicon from '$lib/assets/favicon.svg';
+	import Button from '$lib/components/Button.svelte';
 	import Loader from '$lib/components/Loader.svelte';
 	import { getDockerState, syncDockerState } from '$lib/store/docker-state.svelte';
 	import { onMount } from 'svelte';
@@ -41,6 +42,18 @@
 		</aside>
 
 		<main class="content">
+			<header>
+				<Button
+					onclick={() => {
+						window.history.back();
+					}}>&lt;</Button
+				>
+				<Button
+					onclick={() => {
+						window.history.forward();
+					}}>&gt;</Button
+				>
+			</header>
 			{@render children()}
 		</main>
 	</div>
@@ -88,7 +101,6 @@
 	.nav-link {
 		display: block;
 		padding: 5px;
-		border-radius: 6px;
 		text-decoration: none;
 		color: var(--color-main-80);
 		transition:
@@ -105,6 +117,10 @@
 		background-color: var(--color-main-40);
 		color: var(--color-main-90);
 		font-weight: bold;
+	}
+
+	header {
+		border-bottom: 0.5px solid var(--color-main-40);
 	}
 
 	.content {
