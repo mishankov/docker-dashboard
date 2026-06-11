@@ -52,11 +52,11 @@
 						goto(resolve('/images/[id]', { id: image.Id }));
 					}}
 				>
-					<td>{image.Id.slice(7, 19)}</td>
+					<td title={image.Id}>{image.Id.slice(7, 19)}</td>
 					<td>{image.Containers}</td>
 					<td>
 						{#each image.RepoTags as tag (tag)}
-							<p>{trimLong(tag, 75)}</p>
+							<p title={tag}>{trimLong(tag, 50)}</p>
 						{/each}
 					</td>
 					<td>{formatMemorySize(image.Size.toString())}</td>
