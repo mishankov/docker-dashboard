@@ -5,7 +5,8 @@
 	import Message from '$lib/components/Message.svelte';
 	import TextInput from '$lib/components/TextInput.svelte';
 	import { getDockerState } from '$lib/store/docker-state.svelte';
-	import { formatMemorySize, trimLong } from '$lib/utils';
+	import { formatMemorySize } from '$lib/utils';
+	import type Dockerode from 'dockerode';
 	import { remove } from './images.remote';
 
 	let searchString = $state('');
@@ -13,7 +14,7 @@
 	let message = $state({ message: '', type: '' as 'success' | 'error' });
 	let deletedImageIds = $state<string[]>([]);
 
-	let images = $derived.by(() => {
+	let images: (Dockerode.ImageInfo & { selected?: boolean })[] | undefined = $derived.by(() => {
 		return getDockerState()
 			.images?.filter((i) => {
 				if (!searchString) return true;
@@ -37,12 +38,31 @@
 	{/if}
 	<TextInput bind:value={searchString} placeholder="Search" />
 	<table>
+		<colgroup>
+			<col style="width: 30px" />
+			<col style="width: 70px" />
+			<col style="width: 50px" />
+			<col style="width: 300px" />
+			<col style="width: 80px" />
+			<col style="width: 120px" />
+		</colgroup>
 		<thead>
 			<tr>
+				<th
+					><input
+						type="checkbox"
+						onchange={(e) => {
+							images?.forEach((i) => {
+								i.selected = e.target.checked;
+							});
+						}}
+					/></th
+				>
 				<th>Id</th>
-				<th>Containers</th>
+				<th>In use</th>
 				<th>Tags</th>
 				<th>Size</th>
+				<th>Actions</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -52,11 +72,12 @@
 						goto(resolve('/images/[id]', { id: image.Id }));
 					}}
 				>
+					<td><input type="checkbox" bind:checked={image.selected} /></td>
 					<td title={image.Id}>{image.Id.slice(7, 19)}</td>
 					<td>{image.Containers}</td>
 					<td>
 						{#each image.RepoTags as tag (tag)}
-							<p title={tag}>{trimLong(tag, 50)}</p>
+							<p title={tag} class="tag">{tag}</p>
 						{/each}
 					</td>
 					<td>{formatMemorySize(image.Size.toString())}</td>
@@ -111,12 +132,8 @@
 
 	table {
 		border-collapse: collapse;
-	}
-
-	table,
-	thead,
-	tbody {
-		width: fit-content;
+		table-layout: fixed;
+		width: 100%;
 	}
 
 	thead {
@@ -126,9 +143,18 @@
 	th,
 	td {
 		text-align: left;
-		width: fit-content;
 
 		padding: 5px 10px 5px 10px;
+
+		text-wrap: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	p.tag {
+		text-wrap: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
 	}
 
 	tr:nth-child(odd) {
