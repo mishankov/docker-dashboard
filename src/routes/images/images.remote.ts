@@ -4,7 +4,7 @@ import { docker } from '$lib/server/docker/docker';
 export const remove = command('unchecked', async (id: string) => {
 	const image = docker.getImage(id);
 	try {
-		await image.remove();
+		await image.remove({ force: true });
 	} catch (e) {
 		if (e instanceof Error) {
 			return { message: e.toString() };

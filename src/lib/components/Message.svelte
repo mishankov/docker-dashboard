@@ -7,7 +7,7 @@
 
 <style>
 	div {
-		max-width: 500px;
+		width: fit-content;
 		padding: 20px;
 	}
 

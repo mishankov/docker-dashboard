@@ -59,31 +59,36 @@
 						{/each}
 					</td>
 					<td>{formatMemorySize(image.Size.toString())}</td>
-					<td
-						><button
-							disabled={takingAction}
-							onclick={async (e) => {
-								e.preventDefault();
-								e.stopPropagation();
-								takingAction = true;
-								message = { message: '', type: 'success' };
+					<td>
+						{#if image.Containers < 1}
+							<button
+								disabled={takingAction || image.Containers > 0}
+								title="Will force remove image with all its tags"
+								onclick={async (e) => {
+									e.preventDefault();
+									e.stopPropagation();
+									takingAction = true;
+									message = { message: '', type: 'success' };
 
-								const result = await remove(image.Id);
+									const result = await remove(image.Id);
 
-								if (result) {
-									message = { message: result.message, type: 'error' };
-								} else {
-									deletedImageIds.push(image.Id);
-									message = {
-										message: `Successufuly removed image ${image.RepoTags ? image.RepoTags[0] : image.Id}`,
-										type: 'success'
-									};
-								}
+									if (result) {
+										message = { message: result.message, type: 'error' };
+									} else {
+										deletedImageIds.push(image.Id);
+										message = {
+											message: `Successufuly removed image ${image.Id}`,
+											type: 'success'
+										};
+									}
 
-								takingAction = false;
-							}}>Remove</button
-						></td
-					>
+									takingAction = false;
+								}}
+							>
+								Remove
+							</button>
+						{/if}
+					</td>
 				</tr>
 			{/each}
 		</tbody>
